@@ -63,11 +63,11 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test exponential backoff behavior
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
-- [ ] 4. Checkpoint - Verify device discovery and monitoring
+- [x] 4. Checkpoint - Verify device discovery and monitoring
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement Traffic Analyzer component
-  - [ ] 5.1 Create TrafficAnalyzer class with network interface monitoring
+- [x] 5. Implement Traffic Analyzer component
+  - [x] 5.1 Create TrafficAnalyzer class with network interface monitoring
     - Implement startMonitoring() and stopMonitoring() methods
     - Use systeminformation.networkStats() to read interface statistics
     - Calculate bytes per second rates by comparing consecutive readings
