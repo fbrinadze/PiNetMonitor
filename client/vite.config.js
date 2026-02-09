@@ -24,6 +24,21 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    // Optimize bundle size - use esbuild for minification (faster and built-in)
+    minify: 'esbuild',
+    // Enable code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor libraries into separate chunks
+          'react-vendor': ['react', 'react-dom'],
+          'chart-vendor': ['recharts'],
+          'network-vendor': ['axios', 'socket.io-client']
+        }
+      }
+    },
+    // Chunk size warnings
+    chunkSizeWarningLimit: 1000
   }
 });

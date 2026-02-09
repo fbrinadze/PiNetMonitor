@@ -35,6 +35,10 @@ function createServer(components, options = {}) {
   // Middleware
   app.use(express.json());
 
+  // Serve frontend static files in production
+  const clientDistPath = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientDistPath));
+
   // Request logging middleware
   app.use((req, res, next) => {
     const timestamp = new Date().toISOString();
@@ -245,6 +249,25 @@ function createServer(components, options = {}) {
   });
 
   // ==================== Error Handling Middleware ====================
+
+  /**
+   * Catch-all route to serve React app for client-side routing
+   * This must come after API routes but before 404 handler
+   */
+  app.get('*', (req, res, next) => {
+    // Only serve index.html for non-API routes
+    if (req.url.startsWith('/api')) {
+      return next();
+    }
+    
+    const indexPath = path.join(__dirname, '../../client/dist/index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        // If index.html doesn't exist, pass to 404 handler
+        next();
+      }
+    });
+  });
 
   /**
    * 404 handler for undefined routes

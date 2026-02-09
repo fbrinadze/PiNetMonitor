@@ -6,12 +6,17 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node server/index.js",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "node server/index.js",
+    "build": "npm run build:client",
+    "build:client": "cd client && npm run build",
+    "prebuild": "npm run install:client",
+    "install:client": "cd client && npm install",
     "test": "jest",
     "test:unit": "jest --testPathPattern=tests/unit",
     "test:property": "jest --testPathPattern=tests/property",
     "test:integration": "jest --testPathPattern=tests/integration",
     "test:coverage": "jest --coverage",
-    "build:client": "cd client && npm run build",
     "cleanup": "node scripts/cleanup.js"
   },
   "keywords": ["network", "monitoring", "raspberry-pi"],
