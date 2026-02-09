@@ -228,8 +228,8 @@ This implementation plan breaks down the Network Monitor application into discre
 - [x] 12. Checkpoint - Verify complete backend functionality
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 13. Implement frontend WebSocket service
-  - [ ] 13.1 Create WebSocketService class for frontend
+- [x] 13. Implement frontend WebSocket service
+  - [x] 13.1 Create WebSocketService class for frontend
     - Implement connect() and disconnect() methods
     - Implement subscribe() and unsubscribe() methods
     - Implement event emitter pattern for received events
@@ -238,7 +238,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Handle message parsing errors gracefully
     - _Requirements: 5.5, 5.6_
   
-  - [ ]* 13.2 Write unit tests for WebSocketService
+  - [x] 13.2 Write unit tests for WebSocketService
     - Test connection/disconnection
     - Test subscription management
     - Test reconnection logic
@@ -258,7 +258,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add error handling and retry logic
     - _Requirements: 7.4_
   
-  - [ ]* 14.2 Write unit tests for API service
+  - [ ] 14.2 Write unit tests for API service
     - Test each API function with mock responses
     - Test error handling
     - Test retry logic
