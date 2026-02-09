@@ -181,8 +181,8 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test concurrent request handling
     - _Requirements: 6.4, 6.5, 6.6_
 
-- [ ] 10. Implement WebSocket server
-  - [ ] 10.1 Add WebSocket support to Express server
+- [x] 10. Implement WebSocket server
+  - [x] 10.1 Add WebSocket support to Express server
     - Set up ws WebSocket server alongside Express
     - Implement subscription mechanism (subscribe:devices, subscribe:traffic, subscribe:health)
     - Implement unsubscription mechanism
@@ -195,7 +195,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add error handling for invalid messages
     - _Requirements: 5.5, 5.6_
   
-  - [ ] 10.2 Write integration tests for WebSocket communication
+  - [x] 10.2 Write integration tests for WebSocket communication
     - Test subscription/unsubscription flow
     - Test event emission for each event type
     - Test multiple concurrent client connections
@@ -215,11 +215,11 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add graceful shutdown handling
     - _Requirements: 6.3, 8.3, 8.4_
   
-  - [ ]* 11.2 Write property test for error logging
+  - [ ] 11.2 Write property test for error logging
     - **Property 12: Error Logging**
     - **Validates: Requirements 8.5**
   
-  - [ ]* 11.3 Write integration tests for backend system
+  - [ ] 11.3 Write integration tests for backend system
     - Test full device discovery and monitoring flow
     - Test data persistence across server restarts
     - Test concurrent operations (scanning, monitoring, API requests)

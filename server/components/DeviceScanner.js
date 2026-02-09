@@ -2,6 +2,7 @@ const arp = require('node-arp');
 const ping = require('ping');
 const dns = require('dns').promises;
 const { promisify } = require('util');
+const EventEmitter = require('events');
 
 const arpGetMAC = promisify(arp.getMAC);
 
@@ -19,8 +20,9 @@ const arpGetMAC = promisify(arp.getMAC);
 /**
  * DeviceScanner discovers devices on the local network using ARP scanning and ping sweeps
  */
-class DeviceScanner {
+class DeviceScanner extends EventEmitter {
   constructor() {
+    super();
     /** @type {Map<string, Device>} */
     this.deviceCache = new Map();
     
@@ -454,6 +456,8 @@ class DeviceScanner {
         this.scanDevice(ipAddress).then(device => {
           if (device) {
             devices.push(device);
+            // Emit event for newly discovered device
+            this.emit('deviceDiscovered', device);
           }
         })
       );
@@ -468,6 +472,9 @@ class DeviceScanner {
         cachedDevice.isActive = false;
       }
     }
+    
+    // Emit scan complete event
+    this.emit('scanComplete', devices.length);
     
     return devices;
   }

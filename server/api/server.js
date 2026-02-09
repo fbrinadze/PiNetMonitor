@@ -6,6 +6,7 @@
 const express = require('express');
 const path = require('path');
 const os = require('os');
+const WebSocket = require('ws');
 
 /**
  * Create and configure the Express REST API server
@@ -285,6 +286,215 @@ function createServer(components, options = {}) {
   // ==================== Server Control ====================
 
   let server = null;
+  let wss = null;
+
+  // Track client subscriptions
+  const clientSubscriptions = new WeakMap();
+
+  /**
+   * Initialize WebSocket server
+   * @param {Object} httpServer - HTTP server instance
+   */
+  function initializeWebSocket(httpServer) {
+    wss = new WebSocket.Server({ server: httpServer });
+
+    wss.on('connection', (ws) => {
+      console.log('WebSocket client connected');
+
+      // Initialize subscription tracking for this client
+      const subscriptions = new Set();
+      clientSubscriptions.set(ws, subscriptions);
+
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message.toString());
+          handleWebSocketMessage(ws, data);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+          ws.send(JSON.stringify({
+            type: 'error',
+            message: 'Invalid message format. Expected JSON.',
+            timestamp: new Date().toISOString()
+          }));
+        }
+      });
+
+      ws.on('close', () => {
+        console.log('WebSocket client disconnected');
+        clientSubscriptions.delete(ws);
+      });
+
+      ws.on('error', (error) => {
+        console.error('WebSocket error:', error);
+      });
+
+      // Send welcome message
+      ws.send(JSON.stringify({
+        type: 'connected',
+        message: 'Connected to Network Monitor WebSocket server',
+        timestamp: new Date().toISOString()
+      }));
+    });
+
+    // Set up event listeners for backend components
+    setupComponentEventListeners();
+  }
+
+  /**
+   * Handle incoming WebSocket messages
+   * @param {WebSocket} ws - WebSocket connection
+   * @param {Object} data - Parsed message data
+   */
+  function handleWebSocketMessage(ws, data) {
+    const { type, channel } = data;
+    const subscriptions = clientSubscriptions.get(ws);
+
+    if (!subscriptions) {
+      return;
+    }
+
+    switch (type) {
+      case 'subscribe:devices':
+        subscriptions.add('devices');
+        ws.send(JSON.stringify({
+          type: 'subscribed',
+          channel: 'devices',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      case 'subscribe:traffic':
+        subscriptions.add('traffic');
+        ws.send(JSON.stringify({
+          type: 'subscribed',
+          channel: 'traffic',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      case 'subscribe:health':
+        subscriptions.add('health');
+        ws.send(JSON.stringify({
+          type: 'subscribed',
+          channel: 'health',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      case 'unsubscribe:devices':
+        subscriptions.delete('devices');
+        ws.send(JSON.stringify({
+          type: 'unsubscribed',
+          channel: 'devices',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      case 'unsubscribe:traffic':
+        subscriptions.delete('traffic');
+        ws.send(JSON.stringify({
+          type: 'unsubscribed',
+          channel: 'traffic',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      case 'unsubscribe:health':
+        subscriptions.delete('health');
+        ws.send(JSON.stringify({
+          type: 'unsubscribed',
+          channel: 'health',
+          timestamp: new Date().toISOString()
+        }));
+        break;
+
+      default:
+        ws.send(JSON.stringify({
+          type: 'error',
+          message: `Unknown message type: ${type}`,
+          timestamp: new Date().toISOString()
+        }));
+    }
+  }
+
+  /**
+   * Broadcast message to subscribed clients
+   * @param {string} channel - Subscription channel
+   * @param {Object} message - Message to broadcast
+   */
+  function broadcast(channel, message) {
+    if (!wss) {
+      return;
+    }
+
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        const subscriptions = clientSubscriptions.get(client);
+        if (subscriptions && subscriptions.has(channel)) {
+          client.send(JSON.stringify(message));
+        }
+      }
+    });
+  }
+
+  /**
+   * Set up event listeners for backend components
+   */
+  function setupComponentEventListeners() {
+    // Device Scanner events
+    if (deviceScanner && deviceScanner.on) {
+      deviceScanner.on('deviceDiscovered', (device) => {
+        broadcast('devices', {
+          type: 'device:discovered',
+          device,
+          timestamp: new Date().toISOString()
+        });
+      });
+
+      deviceScanner.on('scanComplete', (deviceCount) => {
+        broadcast('devices', {
+          type: 'scan:complete',
+          deviceCount,
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+
+    // Status Monitor events
+    if (statusMonitor && statusMonitor.onStatusChange) {
+      statusMonitor.onStatusChange((ipAddress, status) => {
+        broadcast('devices', {
+          type: 'device:status',
+          ipAddress,
+          status,
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+
+    // Traffic Analyzer events
+    if (trafficAnalyzer && trafficAnalyzer.onTrafficUpdate) {
+      trafficAnalyzer.onTrafficUpdate((stats) => {
+        broadcast('traffic', {
+          type: 'traffic:update',
+          stats,
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+
+    // Health Monitor events
+    if (healthMonitor && healthMonitor.onHealthUpdate) {
+      healthMonitor.onHealthUpdate((ipAddress, metrics) => {
+        broadcast('health', {
+          type: 'health:update',
+          ipAddress,
+          metrics,
+          timestamp: new Date().toISOString()
+        });
+      });
+    }
+  }
 
   /**
    * Start the server
@@ -296,6 +506,11 @@ function createServer(components, options = {}) {
         server = app.listen(port, () => {
           console.log(`Network Monitor API server listening on port ${port}`);
           console.log(`Access the API at http://localhost:${port}/api`);
+          
+          // Initialize WebSocket server
+          initializeWebSocket(server);
+          console.log(`WebSocket server initialized on port ${port}`);
+          
           resolve(server);
         });
 
@@ -317,6 +532,17 @@ function createServer(components, options = {}) {
    */
   function stop() {
     return new Promise((resolve, reject) => {
+      // Close WebSocket server first
+      if (wss) {
+        wss.clients.forEach((client) => {
+          client.close();
+        });
+        wss.close(() => {
+          console.log('WebSocket server stopped');
+          wss = null;
+        });
+      }
+
       if (!server) {
         resolve();
         return;
@@ -337,7 +563,8 @@ function createServer(components, options = {}) {
   return {
     app,
     start,
-    stop
+    stop,
+    broadcast // Expose broadcast for testing
   };
 }
 
