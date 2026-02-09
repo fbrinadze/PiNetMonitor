@@ -93,8 +93,8 @@ sudo systemctl restart dhcpcd
 
 ```bash
 cd ~
-git clone https://github.com/yourusername/network-monitor.git
-cd network-monitor
+git clone https://github.com/fbrinadze/PiNetMonitor.git
+cd PiNetMonitor
 ```
 
 2. Run the installation script:
@@ -328,7 +328,7 @@ sudo systemctl restart network-monitor
 sudo systemctl stop network-monitor
 
 # Update code
-cd ~/network-monitor
+cd ~/PiNetMonitor
 git pull
 
 # Reinstall
