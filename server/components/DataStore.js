@@ -17,6 +17,7 @@ class DataStore {
       healthMetrics: []
     };
     this.initialized = false;
+    this.writeQueue = Promise.resolve();
   }
 
   /**
@@ -61,26 +62,31 @@ class DataStore {
   }
 
   /**
-   * Write data to disk with atomic write pattern
+   * Write data to disk with atomic write pattern and write queue
    */
   async _write() {
-    const tempPath = `${this.dbPath}.tmp`;
-    
-    try {
-      // Write to temporary file first
-      await fs.writeFile(tempPath, JSON.stringify(this.data, null, 2), 'utf8');
+    // Queue writes to prevent concurrent write conflicts
+    this.writeQueue = this.writeQueue.then(async () => {
+      const tempPath = `${this.dbPath}.tmp`;
       
-      // Atomically rename to actual file
-      await fs.rename(tempPath, this.dbPath);
-    } catch (error) {
-      // Clean up temp file if it exists
       try {
-        await fs.unlink(tempPath);
-      } catch (unlinkError) {
-        // Ignore unlink errors
+        // Write to temporary file first
+        await fs.writeFile(tempPath, JSON.stringify(this.data, null, 2), 'utf8');
+        
+        // Atomically rename to actual file
+        await fs.rename(tempPath, this.dbPath);
+      } catch (error) {
+        // Clean up temp file if it exists
+        try {
+          await fs.unlink(tempPath);
+        } catch (unlinkError) {
+          // Ignore unlink errors
+        }
+        throw error;
       }
-      throw error;
-    }
+    });
+    
+    return this.writeQueue;
   }
 
   /**

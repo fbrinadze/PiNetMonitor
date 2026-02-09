@@ -202,8 +202,8 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test message parsing error handling
     - _Requirements: 5.5, 5.6_
 
-- [ ] 11. Wire backend components together
-  - [ ] 11.1 Create main server initialization module
+- [x] 11. Wire backend components together
+  - [x] 11.1 Create main server initialization module
     - Initialize DataStore and load persisted devices
     - Initialize DeviceScanner and perform initial network scan
     - Initialize StatusMonitor and start monitoring discovered devices
@@ -215,11 +215,11 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add graceful shutdown handling
     - _Requirements: 6.3, 8.3, 8.4_
   
-  - [ ] 11.2 Write property test for error logging
+  - [x] 11.2 Write property test for error logging
     - **Property 12: Error Logging**
     - **Validates: Requirements 8.5**
   
-  - [ ] 11.3 Write integration tests for backend system
+  - [x] 11.3 Write integration tests for backend system
     - Test full device discovery and monitoring flow
     - Test data persistence across server restarts
     - Test concurrent operations (scanning, monitoring, API requests)
