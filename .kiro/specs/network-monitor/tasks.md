@@ -147,11 +147,11 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test disk full scenarios
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 8. Checkpoint - Verify all backend components
+- [x] 8. Checkpoint - Verify all backend components
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 9. Implement REST API server
-  - [ ] 9.1 Create Express server with REST endpoints
+- [-] 9. Implement REST API server
+  - [x] 9.1 Create Express server with REST endpoints
     - Set up Express app listening on port 3000
     - Implement GET /api/devices endpoint
     - Implement POST /api/devices/scan endpoint
@@ -165,15 +165,15 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add request logging middleware
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
   
-  - [ ]* 9.2 Write property test for API response JSON format
+  - [x] 9.2 Write property test for API response JSON format
     - **Property 10: API Response JSON Format**
     - **Validates: Requirements 6.5**
   
-  - [ ]* 9.3 Write property test for API endpoint availability
+  - [ ] 9.3 Write property test for API endpoint availability
     - **Property 11: API Endpoint Availability**
     - **Validates: Requirements 6.4**
   
-  - [ ]* 9.4 Write unit tests for REST API endpoints
+  - [x] 9.4 Write unit tests for REST API endpoints
     - Test each endpoint with valid requests
     - Test invalid request handling (400 errors)
     - Test resource not found handling (404 errors)
@@ -195,7 +195,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add error handling for invalid messages
     - _Requirements: 5.5, 5.6_
   
-  - [ ]* 10.2 Write integration tests for WebSocket communication
+  - [ ] 10.2 Write integration tests for WebSocket communication
     - Test subscription/unsubscription flow
     - Test event emission for each event type
     - Test multiple concurrent client connections
