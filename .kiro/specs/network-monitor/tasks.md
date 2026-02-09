@@ -91,7 +91,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test interface unavailability handling
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 6. Implement Health Monitor component
+- [x] 6. Implement Health Monitor component
   - [x] 6.1 Create HealthMonitor class with latency and packet loss measurement
     - Implement startMonitoring() and stopMonitoring() methods
     - Send 10 ICMP ping packets per measurement cycle
@@ -117,8 +117,8 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test sliding window statistics
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 7. Implement Data Store component
-  - [ ] 7.1 Create DataStore class with lowdb persistence
+- [x] 7. Implement Data Store component
+  - [x] 7.1 Create DataStore class with lowdb persistence
     - Initialize lowdb with JSON file storage in ~/.network-monitor/
     - Implement device CRUD operations (save, get, getAll, delete)
     - Implement traffic stats storage and retrieval with time range queries

@@ -14,6 +14,9 @@ module.exports = {
     '/node_modules/',
     '/client/'
   ],
+  transformIgnorePatterns: [
+    'node_modules/(?!(lowdb)/)'
+  ],
   verbose: true,
   testTimeout: 10000
 };
