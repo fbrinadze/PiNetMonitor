@@ -245,8 +245,8 @@ This implementation plan breaks down the Network Monitor application into discre
     - Test error handling
     - _Requirements: 5.5, 5.6_
 
-- [ ] 14. Implement frontend API service
-  - [ ] 14.1 Create API service module using Axios
+- [x] 14. Implement frontend API service
+  - [x] 14.1 Create API service module using Axios
     - Implement fetchDevices() function
     - Implement triggerScan() function
     - Implement fetchDeviceStatus(ip) function
@@ -258,7 +258,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add error handling and retry logic
     - _Requirements: 7.4_
   
-  - [ ] 14.2 Write unit tests for API service
+  - [x] 14.2 Write unit tests for API service
     - Test each API function with mock responses
     - Test error handling
     - Test retry logic
