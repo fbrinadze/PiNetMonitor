@@ -44,7 +44,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - _Requirements: 1.1, 1.2, 1.5_
 
 - [ ] 3. Implement Status Monitor component
-  - [ ] 3.1 Create StatusMonitor class with connectivity checking
+  - [x] 3.1 Create StatusMonitor class with connectivity checking
     - Implement startMonitoring() and stopMonitoring() methods
     - Add ICMP ping functionality for device status checks
     - Implement event emitter pattern for status change notifications
@@ -53,11 +53,11 @@ This implementation plan breaks down the Network Monitor application into discre
     - Add exponential backoff for offline devices
     - _Requirements: 2.1, 2.2, 2.3, 2.5_
   
-  - [ ]* 3.2 Write property test for status timestamp maintenance
+  - [x] 3.2 Write property test for status timestamp maintenance
     - **Property 4: Status Timestamp Maintenance**
     - **Validates: Requirements 2.4**
   
-  - [ ]* 3.3 Write unit tests for StatusMonitor
+  - [x] 3.3 Write unit tests for StatusMonitor
     - Test status change detection (online to offline, offline to online)
     - Test concurrent device monitoring
     - Test exponential backoff behavior
