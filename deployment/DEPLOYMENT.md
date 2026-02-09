@@ -472,7 +472,7 @@ sudo npm audit fix
 ### Automated Uninstallation
 
 ```bash
-cd ~/network-monitor
+cd ~/PiNetMonitor
 sudo bash deployment/uninstall.sh
 ```
 
@@ -500,7 +500,7 @@ rm -rf ~/.network-monitor
 For issues and questions:
 - Check logs: `sudo journalctl -u network-monitor -f`
 - Review this guide
-- Check GitHub issues: https://github.com/yourusername/network-monitor/issues
+- Check GitHub issues: https://github.com/fbrinadze/PiNetMonitor/issues
 
 ## License
 

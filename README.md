@@ -49,8 +49,8 @@ For Raspberry Pi deployment with automated installation:
 
 ```bash
 # Clone the repository
-git clone <repository-url> ~/network-monitor
-cd ~/network-monitor
+git clone https://github.com/fbrinadze/PiNetMonitor.git ~/PiNetMonitor
+cd ~/PiNetMonitor
 
 # Run automated installation
 sudo bash deployment/install.sh
@@ -93,8 +93,8 @@ sudo systemctl start network-monitor
 ```bash
 # Clone repository
 cd ~
-git clone <repository-url> network-monitor
-cd network-monitor
+git clone https://github.com/fbrinadze/PiNetMonitor.git PiNetMonitor
+cd PiNetMonitor
 
 # Run installation script
 sudo bash deployment/install.sh
@@ -474,7 +474,7 @@ sudo systemctl restart network-monitor
 sudo systemctl stop network-monitor
 
 # Update code
-cd ~/network-monitor
+cd ~/PiNetMonitor
 git pull
 
 # Reinstall
@@ -487,7 +487,7 @@ sudo systemctl start network-monitor
 ### Uninstallation
 
 ```bash
-cd ~/network-monitor
+cd ~/PiNetMonitor
 sudo bash deployment/uninstall.sh
 
 # Optional: Remove user data
@@ -569,7 +569,7 @@ network-monitor/
 For issues and questions:
 - Check logs: `sudo journalctl -u network-monitor -f`
 - Review troubleshooting section above
-- Check GitHub issues: <repository-url>/issues
+- Check GitHub issues: https://github.com/fbrinadze/PiNetMonitor/issues
 
 ## License
 
