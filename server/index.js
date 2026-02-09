@@ -3,6 +3,9 @@
  * @module server/index
  */
 
+// Load environment variables
+require('dotenv').config();
+
 const os = require('os');
 const DeviceScanner = require('./components/DeviceScanner');
 const StatusMonitor = require('./components/StatusMonitor');
@@ -10,15 +13,16 @@ const TrafficAnalyzer = require('./components/TrafficAnalyzer');
 const HealthMonitor = require('./components/HealthMonitor');
 const DataStore = require('./components/DataStore');
 const { createServer } = require('./api/server');
+const logger = require('./config/logger');
 
-// Configuration
+// Configuration from environment variables
 const CONFIG = {
-  port: 3000,
-  subnet: '192.168.1',
-  networkInterface: null, // Auto-detect
-  scanInterval: 5 * 60 * 1000, // 5 minutes
+  port: parseInt(process.env.PORT || '3000', 10),
+  subnet: process.env.SUBNET || '192.168.1',
+  networkInterface: process.env.NETWORK_INTERFACE || null, // Auto-detect if not specified
+  scanInterval: parseInt(process.env.SCAN_INTERVAL || '300000', 10), // 5 minutes
   cleanupInterval: 60 * 60 * 1000, // 1 hour
-  dataRetentionPeriod: 24 * 60 * 60 * 1000 // 24 hours
+  dataRetentionPeriod: parseInt(process.env.DATA_RETENTION_HOURS || '24', 10) * 60 * 60 * 1000
 };
 
 /**
@@ -42,18 +46,18 @@ class NetworkMonitorApp {
    */
   async initialize() {
     try {
-      console.log('Network Monitor Server - Initializing...');
+      logger.info('Network Monitor Server - Initializing...');
 
       // Initialize DataStore and load persisted devices
-      console.log('Initializing DataStore...');
+      logger.info('Initializing DataStore...');
       this.dataStore = new DataStore();
       await this.dataStore.initialize();
       
       const persistedDevices = await this.dataStore.getAllDevices();
-      console.log(`Loaded ${persistedDevices.length} persisted devices from storage`);
+      logger.info(`Loaded ${persistedDevices.length} persisted devices from storage`);
 
       // Initialize DeviceScanner
-      console.log('Initializing DeviceScanner...');
+      logger.info('Initializing DeviceScanner...');
       this.deviceScanner = new DeviceScanner();
       
       // Restore cached devices from persisted data
@@ -62,19 +66,19 @@ class NetworkMonitorApp {
       }
 
       // Initialize StatusMonitor
-      console.log('Initializing StatusMonitor...');
+      logger.info('Initializing StatusMonitor...');
       this.statusMonitor = new StatusMonitor();
 
       // Initialize TrafficAnalyzer
-      console.log('Initializing TrafficAnalyzer...');
+      logger.info('Initializing TrafficAnalyzer...');
       this.trafficAnalyzer = new TrafficAnalyzer();
 
       // Initialize HealthMonitor
-      console.log('Initializing HealthMonitor...');
+      logger.info('Initializing HealthMonitor...');
       this.healthMonitor = new HealthMonitor();
 
       // Create REST API and WebSocket server
-      console.log('Creating API server...');
+      logger.info('Creating API server...');
       this.server = createServer({
         deviceScanner: this.deviceScanner,
         statusMonitor: this.statusMonitor,
@@ -85,9 +89,9 @@ class NetworkMonitorApp {
         port: CONFIG.port
       });
 
-      console.log('Initialization complete');
+      logger.info('Initialization complete');
     } catch (error) {
-      console.error('Failed to initialize application:', error);
+      logger.logError(error, { context: 'Application initialization' });
       throw error;
     }
   }
@@ -98,11 +102,12 @@ class NetworkMonitorApp {
   async start() {
     try {
       if (this.isRunning) {
-        console.warn('Application is already running');
+        logger.warn('Application is already running');
         return;
       }
 
-      console.log('Network Monitor Server - Starting...');
+      logger.info('Network Monitor Server - Starting...');
+      logger.info(`Configuration: Port=${CONFIG.port}, Subnet=${CONFIG.subnet}.x, ScanInterval=${CONFIG.scanInterval}ms`);
 
       // Start the REST API server
       await this.server.start();
@@ -111,36 +116,36 @@ class NetworkMonitorApp {
       this._setupEventHandlers();
 
       // Detect and start monitoring network interface
-      const networkInterface = await this._detectNetworkInterface();
+      const networkInterface = CONFIG.networkInterface || await this._detectNetworkInterface();
       if (networkInterface) {
-        console.log(`Starting traffic monitoring on interface: ${networkInterface}`);
+        logger.info(`Starting traffic monitoring on interface: ${networkInterface}`);
         this.trafficAnalyzer.startMonitoring(networkInterface);
       } else {
-        console.warn('Could not detect network interface, traffic monitoring disabled');
+        logger.warn('Could not detect network interface, traffic monitoring disabled');
       }
 
       // Perform initial network scan
-      console.log(`Performing initial network scan on subnet ${CONFIG.subnet}.x...`);
+      logger.info(`Performing initial network scan on subnet ${CONFIG.subnet}.x...`);
       await this._performNetworkScan();
 
-      // Set up periodic network scans (every 5 minutes)
-      console.log(`Setting up periodic network scans (every ${CONFIG.scanInterval / 1000} seconds)`);
+      // Set up periodic network scans
+      logger.info(`Setting up periodic network scans (every ${CONFIG.scanInterval / 1000} seconds)`);
       this.scanIntervalId = setInterval(() => {
         this._performNetworkScan();
       }, CONFIG.scanInterval);
 
-      // Set up automatic data cleanup (every hour)
-      console.log(`Setting up automatic data cleanup (every ${CONFIG.cleanupInterval / 1000} seconds)`);
+      // Set up automatic data cleanup
+      logger.info(`Setting up automatic data cleanup (every ${CONFIG.cleanupInterval / 1000} seconds)`);
       this.cleanupIntervalId = setInterval(() => {
         this._performDataCleanup();
       }, CONFIG.cleanupInterval);
 
       this.isRunning = true;
-      console.log('Network Monitor Server - Running');
-      console.log(`Access the API at http://localhost:${CONFIG.port}/api`);
-      console.log(`System hostname: ${os.hostname()}`);
+      logger.info('Network Monitor Server - Running');
+      logger.info(`Access the API at http://localhost:${CONFIG.port}/api`);
+      logger.info(`System hostname: ${os.hostname()}`);
     } catch (error) {
-      console.error('Failed to start application:', error);
+      logger.logError(error, { context: 'Application startup' });
       throw error;
     }
   }
@@ -154,7 +159,7 @@ class NetworkMonitorApp {
         return;
       }
 
-      console.log('Stopping Network Monitor Server...');
+      logger.info('Stopping Network Monitor Server...');
 
       // Clear periodic tasks
       if (this.scanIntervalId) {
@@ -191,9 +196,9 @@ class NetworkMonitorApp {
       }
 
       this.isRunning = false;
-      console.log('Network Monitor Server - Stopped');
+      logger.info('Network Monitor Server - Stopped');
     } catch (error) {
-      console.error('Error during shutdown:', error);
+      logger.logError(error, { context: 'Application shutdown' });
       throw error;
     }
   }
@@ -213,9 +218,9 @@ class NetworkMonitorApp {
         this.statusMonitor.startMonitoring(device);
         this.healthMonitor.startMonitoring(device.ipAddress);
 
-        console.log(`Device discovered: ${device.ipAddress} (${device.hostname})`);
+        logger.logDeviceEvent('discovered', device);
       } catch (error) {
-        console.error(`Error handling device discovery for ${device.ipAddress}:`, error);
+        logger.logError(error, { context: 'Device discovery', ipAddress: device.ipAddress });
       }
     });
 
@@ -230,9 +235,13 @@ class NetworkMonitorApp {
           await this.dataStore.saveDevice(device);
         }
 
-        console.log(`Device status changed: ${ipAddress} - ${status.isOnline ? 'online' : 'offline'}`);
+        logger.logNetworkEvent('status_change', { 
+          ipAddress, 
+          status: status.isOnline ? 'online' : 'offline',
+          responseTime: status.responseTime
+        });
       } catch (error) {
-        console.error(`Error handling status change for ${ipAddress}:`, error);
+        logger.logError(error, { context: 'Status change', ipAddress });
       }
     });
 
@@ -248,7 +257,7 @@ class NetworkMonitorApp {
           await this.dataStore.saveTrafficStats(stats);
         }
       } catch (error) {
-        console.error('Error saving traffic stats:', error);
+        logger.logError(error, { context: 'Traffic stats save' });
       }
     });
 
@@ -259,10 +268,13 @@ class NetworkMonitorApp {
         await this.dataStore.saveHealthMetrics(metrics);
 
         if (metrics.isDegraded) {
-          console.warn(`Device health degraded: ${ipAddress} - Latency: ${metrics.latency.toFixed(2)}ms, Packet Loss: ${metrics.packetLoss.toFixed(2)}%`);
+          logger.warn(`Device health degraded: ${ipAddress}`, {
+            latency: metrics.latency.toFixed(2),
+            packetLoss: metrics.packetLoss.toFixed(2)
+          });
         }
       } catch (error) {
-        console.error(`Error saving health metrics for ${ipAddress}:`, error);
+        logger.logError(error, { context: 'Health metrics save', ipAddress });
       }
     });
   }
@@ -273,15 +285,15 @@ class NetworkMonitorApp {
    */
   async _performNetworkScan() {
     try {
-      console.log(`Starting network scan on ${CONFIG.subnet}.x...`);
+      logger.info(`Starting network scan on ${CONFIG.subnet}.x...`);
       const startTime = Date.now();
       
       const devices = await this.deviceScanner.scanNetwork(CONFIG.subnet);
       
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-      console.log(`Network scan complete: ${devices.length} devices found in ${duration}s`);
+      logger.logPerformance('network_scan', duration, { deviceCount: devices.length });
     } catch (error) {
-      console.error('Error during network scan:', error);
+      logger.logError(error, { context: 'Network scan' });
     }
   }
 
@@ -292,13 +304,13 @@ class NetworkMonitorApp {
   async _performDataCleanup() {
     try {
       const cutoffDate = new Date(Date.now() - CONFIG.dataRetentionPeriod);
-      console.log(`Cleaning up data older than ${cutoffDate.toISOString()}...`);
+      logger.info(`Cleaning up data older than ${cutoffDate.toISOString()}...`);
       
       await this.dataStore.cleanupOldData(cutoffDate);
       
-      console.log('Data cleanup complete');
+      logger.info('Data cleanup complete');
     } catch (error) {
-      console.error('Error during data cleanup:', error);
+      logger.logError(error, { context: 'Data cleanup' });
     }
   }
 
@@ -334,7 +346,7 @@ class NetworkMonitorApp {
       
       return null;
     } catch (error) {
-      console.error('Error detecting network interface:', error);
+      logger.logError(error, { context: 'Network interface detection' });
       return null;
     }
   }
@@ -347,42 +359,42 @@ const app = new NetworkMonitorApp();
 app.initialize()
   .then(() => app.start())
   .catch(error => {
-    console.error('Failed to start Network Monitor:', error);
+    logger.logError(error, { context: 'Application startup' });
     process.exit(1);
   });
 
 // Graceful shutdown handlers
 process.on('SIGINT', async () => {
-  console.log('\nReceived SIGINT, shutting down gracefully...');
+  logger.info('Received SIGINT, shutting down gracefully...');
   try {
     await app.stop();
-    console.log('Shutdown complete');
+    logger.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
-    console.error('Error during shutdown:', error);
+    logger.logError(error, { context: 'SIGINT shutdown' });
     process.exit(1);
   }
 });
 
 process.on('SIGTERM', async () => {
-  console.log('\nReceived SIGTERM, shutting down gracefully...');
+  logger.info('Received SIGTERM, shutting down gracefully...');
   try {
     await app.stop();
-    console.log('Shutdown complete');
+    logger.info('Shutdown complete');
     process.exit(0);
   } catch (error) {
-    console.error('Error during shutdown:', error);
+    logger.logError(error, { context: 'SIGTERM shutdown' });
     process.exit(1);
   }
 });
 
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught exception:', error);
+  logger.logError(error, { context: 'Uncaught exception' });
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled rejection', { reason, promise });
   process.exit(1);
 });

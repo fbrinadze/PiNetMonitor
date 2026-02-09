@@ -386,8 +386,8 @@ This implementation plan breaks down the Network Monitor application into discre
 - [x] 22. Checkpoint - Verify complete application
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 23. Add deployment configuration
-  - [ ] 23.1 Create deployment scripts and configuration
+- [x] 23. Add deployment configuration
+  - [x] 23.1 Create deployment scripts and configuration
     - Create systemd service file for auto-start
     - Create installation script for Raspberry Pi setup
     - Add logging configuration (winston or similar)
@@ -396,7 +396,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - Document required permissions and setup steps
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
   
-  - [ ] 23.2 Create README with setup instructions
+  - [x] 23.2 Create README with setup instructions
     - Document system requirements
     - Document installation steps
     - Document configuration options
