@@ -169,7 +169,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - **Property 10: API Response JSON Format**
     - **Validates: Requirements 6.5**
   
-  - [ ] 9.3 Write property test for API endpoint availability
+  - [x] 9.3 Write property test for API endpoint availability
     - **Property 11: API Endpoint Availability**
     - **Validates: Requirements 6.4**
   
