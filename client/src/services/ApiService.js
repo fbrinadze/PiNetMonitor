@@ -6,7 +6,8 @@ import axios from 'axios';
  */
 
 // Base URL for API requests
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+// Use relative URL so it works from any device on the network
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // Axios instance with default configuration
 const apiClient = axios.create({
