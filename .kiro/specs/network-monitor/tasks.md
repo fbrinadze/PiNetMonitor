@@ -92,7 +92,7 @@ This implementation plan breaks down the Network Monitor application into discre
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 - [ ] 6. Implement Health Monitor component
-  - [ ] 6.1 Create HealthMonitor class with latency and packet loss measurement
+  - [x] 6.1 Create HealthMonitor class with latency and packet loss measurement
     - Implement startMonitoring() and stopMonitoring() methods
     - Send 10 ICMP ping packets per measurement cycle
     - Calculate latency statistics (average, min, max, jitter)
